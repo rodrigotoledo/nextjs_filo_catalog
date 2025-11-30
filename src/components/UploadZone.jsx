@@ -2,37 +2,57 @@
 
 import { useState, useCallback } from "react";
 import { useDropzone } from "@uploadthing/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Upload, Image } from "lucide-react";
 
 export default function UploadZone() {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const queryClient = useQueryClient();
+
+  const handleUpload = useCallback(async (fileList) => {
+    setUploading(true);
+    setProgress(0);
+
+    const formData = new FormData();
+    fileList.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      console.log('Upload successful:', result);
+      queryClient.invalidateQueries({ queryKey: ['photos'] });
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Erro no upload. Tente novamente.');
+      setUploading(false);
+      return;
+    }
+
+    setProgress(100);
+    setTimeout(() => {
+      setFiles([]);
+      setProgress(0);
+      setUploading(false);
+      alert(`${fileList.length} fotos enviadas! Já estão na fila para processamento com IA.`);
+    }, 600);
+  }, [queryClient]);
 
   const onDrop = useCallback((acceptedFiles) => {
     setFiles(acceptedFiles);
     handleUpload(acceptedFiles);
-  }, []);
-
-  const handleUpload = async (fileList) => {
-    setUploading(true);
-    setProgress(0);
-    const total = fileList.length;
-    let done = 0;
-
-    for (const file of fileList) {
-      await new Promise(r => setTimeout(r, 30));
-      done++;
-      setProgress(Math.round((done / total) * 100));
-    }
-
-    setUploading(false);
-    setTimeout(() => {
-      setFiles([]);
-      setProgress(0);
-      alert(`${total} fotos enviadas! Já estão na fila para processamento com IA.`);
-    }, 600);
-  };
+  }, [handleUpload]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

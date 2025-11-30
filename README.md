@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Photo Finder
 
-## Getting Started
+Um catálogo privado de fotos com busca semântica powered by IA. Upload em massa, processamento automático e interface moderna.
 
-First, run the development server:
+## Funcionalidades
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Upload em Massa**: Arraste e solte milhares de fotos de uma vez
+- **Busca Semântica**: Encontre fotos por descrição natural usando IA
+- **Catálogo Privado**: 100% privado, sem dados enviados para terceiros
+- **Interface Moderna**: Design responsivo com Tailwind CSS
+- **API Integrada**: Backend em FastAPI para processamento e armazenamento
+
+## Tecnologias
+
+- **Frontend**: Next.js 15, React, Tailwind CSS, React Query
+- **Backend**: FastAPI (Python) - esperado em `http://localhost:8000`
+- **Upload**: Suporte a múltiplas imagens via drag & drop
+- **Estado**: Gerenciamento com React Query para cache e sincronização
+
+## Estrutura do Projeto
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── photos/          # API para listar fotos (com paginação)
+│   │   └── upload/          # API para upload de fotos
+│   ├── globals.css          # Estilos globais
+│   ├── layout.js            # Layout da aplicação
+│   └── page.jsx             # Página principal
+├── components/
+│   ├── PhotoGrid.jsx        # Grid de exibição das fotos
+│   ├── SearchBar.jsx        # Barra de busca
+│   └── UploadZone.jsx       # Zona de upload
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Pré-requisitos
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- Node.js 18+
+- Python 3.8+ (para o backend FastAPI)
+- FastAPI backend rodando em `localhost:8000`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Instalação e Execução
 
-## Learn More
+1. **Clone o repositório**:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   git clone <repo-url>
+   cd photo-finder
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Instale as dependências**:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. **Configure o ambiente**:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   Copie `.env.local` e ajuste se necessário:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```text
+   FASTAPI_URL=http://localhost:8000
+   ```
+
+4. **Inicie o backend FastAPI** (em outro terminal):
+
+   ```bash
+   # No diretório do FastAPI
+   uvicorn main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+5. **Execute o frontend**:
+
+   ```bash
+   npm run dev
+   ```
+
+6. **Acesse**: [http://localhost:3000](http://localhost:3000)
+
+## Como Usar
+
+1. **Upload**: Arraste fotos para a zona de upload ou clique para selecionar
+2. **Visualizar**: As fotos aparecem automaticamente no grid após upload
+3. **Navegar**: Use paginação para ver mais fotos
+4. **Buscar**: Use a barra de busca para consultas semânticas (futuro)
+
+## API Endpoints
+
+- `POST /api/upload`: Envia fotos para o FastAPI
+- `GET /api/photos?page=1`: Lista fotos paginadas do FastAPI
+
+## Desenvolvimento
+
+- **Hot Reload**: Mudanças são aplicadas automaticamente
+- **Linting**: ESLint configurado
+- **Build**: `npm run build` para produção
+
+## Contribuição
+
+1. Fork o projeto
+2. Crie uma branch para sua feature
+3. Commit suas mudanças
+4. Push e abra um PR
+
+## Licença
+
+MIT

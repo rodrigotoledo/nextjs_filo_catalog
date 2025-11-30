@@ -33,7 +33,7 @@ export default function PhotoGrid({ photos = [] }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
             <div className="absolute bottom-3 left-3 right-3">
               <p className="text-xs text-white/80 truncate">
-                {photo.id.slice(0, 8)}
+                {photo.id?.toString().slice(0, 8) || 'Sem ID'}
               </p>
             </div>
           </div>
