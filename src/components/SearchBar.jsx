@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 
-export default function SearchBar() {
+export default function SearchBar({ onSearch }) {
   const [query, setQuery] = useState("");
 
   const handleSearch = async (e) => {
@@ -11,14 +11,7 @@ export default function SearchBar() {
     if (!query.trim()) return;
 
     console.log("Buscando por:", query);
-
-    // Quando tiver o backend, vai ser assim:
-    // const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-    // const data = await res.json();
-    // ... usar os resultados
-
-    // Por enquanto só mostra o alert bonitinho
-    alert(`Procurando por: "${query}"\n\n(Backend ainda não conectado, mas já tá pronto pra quando tiver)`);
+    await onSearch(query);
   };
 
   return (

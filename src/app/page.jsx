@@ -12,6 +12,7 @@ const queryClient = new QueryClient();
 
 function HomeContent() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchResults, setSearchResults] = useState(null);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['photos', currentPage],
@@ -22,10 +23,28 @@ function HomeContent() {
       console.log('Photos data:', data);
       return data;
     },
+    enabled: !searchResults, // Disable when searching
   });
 
-  const photos = data?.photos || [];
+  const photos = searchResults || (data?.photos || []);
   const { total, page, total_pages, has_next, has_prev } = data || {};
+
+  const handleSearch = async (query) => {
+    if (!query.trim()) {
+      setSearchResults(null);
+      setCurrentPage(1);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error('Search failed');
+      const data = await response.json();
+      setSearchResults(data.results);
+    } catch (error) {
+      console.error('Search error:', error);
+      alert('Erro na busca: ' + error.message);
+    }
+  };
 
   const nextPage = () => setCurrentPage(prev => prev + 1);
   const prevPage = () => setCurrentPage(prev => Math.max(1, prev - 1));
@@ -45,7 +64,7 @@ function HomeContent() {
       </header>
 
       <div className="container mx-auto px-6 py-12 max-w-7xl">
-        <SearchBar />
+        <SearchBar onSearch={handleSearch} />
         <UploadZone />
         {isLoading ? (
           <div className="text-center py-32">
@@ -59,23 +78,35 @@ function HomeContent() {
         ) : (
           <PhotoGrid photos={photos} />
         )}
-        <div className="flex justify-center mt-8 space-x-4">
-          <button
-            onClick={prevPage}
-            disabled={!has_prev}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded disabled:opacity-50"
-          >
-            Anterior
-          </button>
-          <span className="px-4 py-2">Página {page} de {total_pages} (Total: {total})</span>
-          <button
-            onClick={nextPage}
-            disabled={!has_next}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded disabled:opacity-50"
-          >
-            Próxima
-          </button>
-        </div>
+        {searchResults ? (
+          <div className="text-center mt-8">
+            <p className="text-muted mb-4">Resultados da busca ({searchResults.length} encontrados)</p>
+            <button
+              onClick={() => setSearchResults(null)}
+              className="px-4 py-2 bg-secondary text-secondary-foreground rounded"
+            >
+              Limpar busca
+            </button>
+          </div>
+        ) : (
+          <div className="flex justify-center mt-8 space-x-4">
+            <button
+              onClick={prevPage}
+              disabled={!has_prev}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            <span className="px-4 py-2">Página {page} de {total_pages} (Total: {total})</span>
+            <button
+              onClick={nextPage}
+              disabled={!has_next}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded disabled:opacity-50"
+            >
+              Próxima
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

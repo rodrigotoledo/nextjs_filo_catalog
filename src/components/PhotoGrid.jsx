@@ -35,6 +35,11 @@ export default function PhotoGrid({ photos = [] }) {
               <p className="text-xs text-white/80 truncate">
                 {photo.id?.toString().slice(0, 8) || 'Sem ID'}
               </p>
+              {photo.similarity_score && (
+                <p className="text-xs text-white/60">
+                  Score: {(photo.similarity_score * 100).toFixed(1)}%
+                </p>
+              )}
             </div>
           </div>
         </div>
