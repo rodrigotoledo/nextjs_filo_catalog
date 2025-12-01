@@ -4,9 +4,14 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
     const files = formData.getAll('files'); // Assuming the field is 'files'
+    const description = formData.get('description');
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 });
+    }
+
+    if (!description) {
+      return NextResponse.json({ error: 'Description is required' }, { status: 400 });
     }
 
     // Create a new FormData to send to FastAPI
@@ -14,6 +19,7 @@ export async function POST(request) {
     files.forEach((file, index) => {
       fastApiFormData.append('files', file);
     });
+    fastApiFormData.append('description', description);
 
     // Get the FastAPI URL from env
     const fastApiUrl = process.env.FASTAPI_URL;

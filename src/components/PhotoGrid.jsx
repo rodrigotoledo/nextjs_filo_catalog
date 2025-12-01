@@ -30,7 +30,7 @@ export default function PhotoGrid({ photos = [] }) {
           />
 
           {/* Overlay sutil ao passar o mouse */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
             <div className="absolute bottom-3 left-3 right-3">
               <p className="text-xs text-white/80 truncate">
                 {photo.id?.toString().slice(0, 8) || 'Sem ID'}
