@@ -2,22 +2,14 @@
 
 import { useState, useCallback } from "react";
 import { useDropzone } from "@uploadthing/react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Upload, Image } from "lucide-react";
+import { FileText, Upload, X } from "lucide-react";
 
-export default function UploadZone() {
+export default function DocumentUploadZone({ clienteId, onDocumentUploaded }) {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [description, setDescription] = useState("");
-  const queryClient = useQueryClient();
 
   const handleUpload = useCallback(async (fileList) => {
-    if (!description.trim()) {
-      alert("Descrição é obrigatória!");
-      return;
-    }
-
     setUploading(true);
     setProgress(0);
 
@@ -25,10 +17,10 @@ export default function UploadZone() {
     fileList.forEach((file) => {
       formData.append('files', file);
     });
-    formData.append('description', description);
+    formData.append('clienteId', clienteId);
 
     try {
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/upload-documents', {
         method: 'POST',
         body: formData,
       });
@@ -38,8 +30,14 @@ export default function UploadZone() {
       }
 
       const result = await response.json();
-      console.log('Upload successful:', result);
-      queryClient.invalidateQueries({ queryKey: ['photos'] });
+      console.log('Document upload successful:', result);
+
+      // Callback para atualizar a lista de documentos do cliente
+      if (onDocumentUploaded) {
+        onDocumentUploaded(result);
+      }
+
+      alert(`${fileList.length} documento(s) enviado(s)! Processamento com IA iniciado.`);
     } catch (error) {
       console.error('Upload error:', error);
       alert('Erro no upload. Tente novamente.');
@@ -52,38 +50,53 @@ export default function UploadZone() {
       setFiles([]);
       setProgress(0);
       setUploading(false);
-      setDescription(""); // Clear description
-      alert(`${fileList.length} fotos enviadas! Já estão na fila para processamento com IA.`);
     }, 600);
-  }, [queryClient, description]);
+  }, [clienteId, onDocumentUploaded]);
 
   const onDrop = useCallback((acceptedFiles) => {
     setFiles(acceptedFiles);
     handleUpload(acceptedFiles);
   }, [handleUpload]);
 
+  const removeFile = (index) => {
+    setFiles(files.filter((_, i) => i !== index));
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { "image/*": [] },
+    accept: {
+      "application/pdf": [".pdf"],
+      "image/*": [".jpg", ".jpeg", ".png"],
+      "application/msword": [".doc"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"]
+    },
     multiple: true,
   });
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Campo de descrição */}
-      <div>
-        <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
-          Descrição das fotos <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Ex: viagem para praia, cachorros brincando..."
-          className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-card border border-border rounded-lg sm:rounded-xl focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-          required
-        />
-      </div>
+      {/* Lista de arquivos selecionados */}
+      {files.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium">Arquivos selecionados:</h4>
+          {files.map((file, index) => (
+            <div key={index} className="flex items-center justify-between bg-background/50 border border-border rounded-lg p-2">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-primary" />
+                <span className="text-sm truncate">{file.name}</span>
+                <span className="text-xs text-muted">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+              </div>
+              <button
+                onClick={() => removeFile(index)}
+                className="p-1 hover:bg-red-500/10 rounded"
+                disabled={uploading}
+              >
+                <X className="w-4 h-4 text-red-500" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Área de upload */}
       <div className="flex flex-col">
@@ -103,7 +116,7 @@ export default function UploadZone() {
               <div className="w-full max-w-sm mx-auto bg-border rounded-full h-1.5 sm:h-2 md:h-3">
                 <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
               </div>
-              <p className="text-xs text-muted">Processando {files.length}...</p>
+              <p className="text-xs text-muted">Processando {files.length} documento(s)...</p>
             </div>
           ) : (
             <div className="space-y-2 sm:space-y-3">
@@ -112,7 +125,7 @@ export default function UploadZone() {
                 {isDragActive ? "Solte aqui" : "Arraste ou clique"}
               </p>
               <p className="text-xs text-muted">
-                Fotos ilimitadas
+                PDF, JPG, PNG, DOC, DOCX
               </p>
             </div>
           )}

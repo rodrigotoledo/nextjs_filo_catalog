@@ -98,3 +98,29 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
 }
+.select-theme {
+  background-color: #000 !important;       /* fundo preto */
+  color: #e4e4e7 !important;               /* texto claro */
+  border: 1px solid #27272a !important;    /* mesma borda do layout */
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Hover */
+.select-theme:hover {
+  background-color: #09090b !important;    /* preto levemente mais claro */
+}
+
+/* Focus */
+.select-theme:focus {
+  outline: none;
+  border-color: #3f3f46 !important;        /* destaque suave */
+  box-shadow: 0 0 0 2px #3f3f4680;         /* glow discreto */
+}
+
+/* Options internas */
+.select-theme option {
+  background-color: #000 !important;
+  color: #e4e4e7 !important;
+}

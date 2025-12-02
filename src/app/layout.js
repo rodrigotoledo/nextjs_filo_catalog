@@ -2,11 +2,11 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
+import Header from "@/components/Header";
 
 export const metadata = {
-  title: "CATÁLOGO 666",
-  description: "As fotos que o mundo não pode ver",
+  title: "FiloCommander",
+  description: "Sistema completo de gerenciamento de catálogo de fotos com IA e cadastro de clientes",
 };
 
 export default function RootLayout({ children }) {
@@ -17,7 +17,8 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#000000" />
       </head>
       <body className="bg-background text-foreground min-h-screen antialiased">
-        <main className="relative z-10 min-h-screen">
+        <Header />
+        <main className="relative z-10 min-h-screen pt-16 sm:pt-20">
           {children}
         </main>
       </body>

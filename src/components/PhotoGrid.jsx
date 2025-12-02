@@ -1,13 +1,13 @@
 export default function PhotoGrid({ photos = [] }) {
   if (photos.length === 0) {
     return (
-      <div className="text-center py-32">
-        <div className="max-w-md mx-auto space-y-4">
-          <div className="w-24 h-24 mx-auto bg-border/50 rounded-2xl animate-pulse" />
-          <p className="text-2xl font-medium text-muted">
+      <div className="text-center py-16 sm:py-24 md:py-32">
+        <div className="max-w-md mx-auto space-y-3 sm:space-y-4">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto bg-border/50 rounded-xl sm:rounded-2xl animate-pulse" />
+          <p className="text-lg sm:text-xl md:text-2xl font-medium text-muted">
             Nenhuma foto ainda
           </p>
-          <p className="text-sm text-muted/70">
+          <p className="text-xs sm:text-sm text-muted/70">
             Faça upload das suas imagens e a IA vai processar tudo automaticamente
           </p>
         </div>
@@ -16,7 +16,7 @@ export default function PhotoGrid({ photos = [] }) {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mt-12">
+    <div className="grid grid-cols-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-1 sm:gap-2 md:gap-4 mt-4 sm:mt-8 md:mt-12">
       {photos.map((photo) => (
         <div
           key={photo.id}

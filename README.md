@@ -1,14 +1,22 @@
-# Photo Finder
+# FiloCommander
 
-Um catálogo privado de fotos com busca semântica powered by IA. Upload em massa, processamento automático e interface moderna.
+Sistema completo para gerenciamento de catálogo de fotos com IA e cadastro de clientes. Upload em massa, busca semântica e gestão de contatos.
 
 ## Funcionalidades
+
+### 📸 Catálogo de Fotos
 
 - **Upload em Massa**: Arraste e solte milhares de fotos de uma vez
 - **Busca Semântica**: Encontre fotos por descrição natural usando IA
 - **Catálogo Privado**: 100% privado, sem dados enviados para terceiros
-- **Interface Moderna**: Design responsivo com Tailwind CSS
-- **API Integrada**: Backend em FastAPI para processamento e armazenamento
+- **Paginação**: Navegação eficiente entre páginas de fotos
+- **Seeds**: Popule o banco com fotos de exemplo para testes
+
+### 👥 Gestão de Clientes
+
+- **Cadastro Completo**: Nome, e-mail, telefone e endereço
+- **Lista Organizada**: Visualização clara de todos os clientes
+- **Interface Intuitiva**: Formulários simples e responsivos
 
 ## Tecnologias
 
@@ -16,22 +24,28 @@ Um catálogo privado de fotos com busca semântica powered by IA. Upload em mass
 - **Backend**: FastAPI (Python) - esperado em `http://localhost:8000`
 - **Upload**: Suporte a múltiplas imagens via drag & drop
 - **Estado**: Gerenciamento com React Query para cache e sincronização
+- **Navegação**: Next.js App Router com navegação client-side
 
 ## Estrutura do Projeto
 
-```
+```text
 src/
 ├── app/
 │   ├── api/
 │   │   ├── photos/          # API para listar fotos (com paginação)
-│   │   └── upload/          # API para upload de fotos
+│   │   ├── upload/          # API para upload de fotos
+│   │   ├── search/          # API para busca semântica
+│   │   └── populate/        # API para popular banco com seeds
+│   ├── clientes/            # Página de gestão de clientes
 │   ├── globals.css          # Estilos globais
-│   ├── layout.js            # Layout da aplicação
-│   └── page.jsx             # Página principal
+│   ├── layout.js            # Layout da aplicação com header fixo
+│   └── page.jsx             # Página principal (fotos)
 ├── components/
+│   ├── Header.jsx           # Header com navegação
 │   ├── PhotoGrid.jsx        # Grid de exibição das fotos
 │   ├── SearchBar.jsx        # Barra de busca
-│   └── UploadZone.jsx       # Zona de upload
+│   ├── UploadZone.jsx       # Zona de upload
+│   └── SeedForm.jsx         # Formulário para seeds
 ```
 
 ## Pré-requisitos
