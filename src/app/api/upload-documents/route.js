@@ -4,13 +4,13 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
     const files = formData.getAll('files');
-    const clienteId = formData.get('clienteId');
+    const clientId = formData.get('clientId');
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 });
     }
 
-    if (!clienteId) {
+    if (!clientId) {
       return NextResponse.json({ error: 'Client ID is required' }, { status: 400 });
     }
 
@@ -19,7 +19,7 @@ export async function POST(request) {
     files.forEach((file, index) => {
       fastApiFormData.append('files', file);
     });
-    fastApiFormData.append('clienteId', clienteId);
+    fastApiFormData.append('clientId', clientId);
 
     // Get the FastAPI URL from env
     const fastApiUrl = process.env.FASTAPI_URL;

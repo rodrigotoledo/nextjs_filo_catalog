@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "@uploadthing/react";
 import { FileText, Upload, X } from "lucide-react";
 
-export default function DocumentUploadZone({ clienteId, onDocumentUploaded }) {
+export default function DocumentUploadZone({ clientId, onDocumentUploaded }) {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -17,7 +17,7 @@ export default function DocumentUploadZone({ clienteId, onDocumentUploaded }) {
     fileList.forEach((file) => {
       formData.append('files', file);
     });
-    formData.append('clienteId', clienteId);
+    formData.append('clientId', clientId);
 
     try {
       const response = await fetch('/api/upload-documents', {
@@ -32,7 +32,7 @@ export default function DocumentUploadZone({ clienteId, onDocumentUploaded }) {
       const result = await response.json();
       console.log('Document upload successful:', result);
 
-      // Callback para atualizar a lista de documentos do cliente
+      // Callback para atualizar a lista de documentos do client
       if (onDocumentUploaded) {
         onDocumentUploaded(result);
       }
@@ -51,7 +51,7 @@ export default function DocumentUploadZone({ clienteId, onDocumentUploaded }) {
       setProgress(0);
       setUploading(false);
     }, 600);
-  }, [clienteId, onDocumentUploaded]);
+  }, [clientId, onDocumentUploaded]);
 
   const onDrop = useCallback((acceptedFiles) => {
     setFiles(acceptedFiles);

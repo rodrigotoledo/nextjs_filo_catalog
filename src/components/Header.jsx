@@ -38,9 +38,9 @@ export default function Header() {
                 Fotos
               </Link>
               <Link
-                href="/clientes"
+                href="/clients"
                 className={`flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg transition-colors text-sm sm:text-base ${
-                  pathname === "/clientes"
+                  pathname === "/clients"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
@@ -109,16 +109,16 @@ export default function Header() {
                 <span className="font-medium text-sm sm:text-base">Fotos</span>
               </Link>
               <Link
-                href="/clientes"
+                href="/clients"
                 onClick={toggleDrawer}
                 className={`flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-lg transition-colors ${
-                  pathname === "/clientes"
+                  pathname === "/clients"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 <Users className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="font-medium text-sm sm:text-base">Clientes</span>
+                <span className="font-medium text-sm sm:text-base">Clients</span>
               </Link>
             </nav>
           </div>

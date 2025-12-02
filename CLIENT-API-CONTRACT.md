@@ -1,17 +1,17 @@
-# Cliente API Contract
+# Client API Contract
 
-Este documento define a estrutura de dados completa para operações de **create** e **update** de clientes no sistema FiloCommander.
+Este documento define a estrutura de dados completa para operações de **create** e **update** de clients no sistema FiloCommander.
 
-## 📋 Estrutura de Dados - Cliente
+## 📋 Estrutura de Dados - Client
 
 ### Campos Principais
 
 | Campo | Tipo | Obrigatório | Descrição |
 |-------|------|-------------|-----------|
-| `id` | `number` | ❌ (apenas update) | ID único do cliente |
-| `name` | `string` | ✅ | Nome completo do cliente |
-| `nickname` | `string` | ❌ | Apelido/apelido do cliente |
-| `email` | `string` | ✅ | E-mail do cliente |
+| `id` | `number` | ❌ (apenas update) | ID único do client |
+| `name` | `string` | ✅ | Nome completo do client |
+| `nickname` | `string` | ❌ | Apelido/apelido do client |
+| `email` | `string` | ✅ | E-mail do client |
 | `phone` | `string` | ❌ | Telefone com máscara: `(11) 99999-9999` |
 | `documents` | `object` | ✅ | Objeto contendo documentos |
 | `addresses` | `array` | ✅ | Array de endereços (mínimo 1) |
@@ -20,8 +20,8 @@ Este documento define a estrutura de dados completa para operações de **create
 
 | Campo | Tipo | Obrigatório | Descrição | Formato |
 |-------|------|-------------|-----------|---------|
-| `cpf` | `string` | ✅ | CPF do cliente | `999.999.999-99` |
-| `rg` | `string` | ❌ | RG do cliente | Texto livre |
+| `cpf` | `string` | ✅ | CPF do client | `999.999.999-99` |
+| `rg` | `string` | ❌ | RG do client | Texto livre |
 | `birth_date` | `string` | ❌ | Data de nascimento | `YYYY-MM-DD` |
 
 ### Objeto `addresses[]` (Array de Endereços)
@@ -40,10 +40,10 @@ Este documento define a estrutura de dados completa para operações de **create
 
 ## 🚀 Operações da API
 
-### CREATE - Novo Cliente
+### CREATE - Novo Client
 
-**Endpoint:** `POST /api/clientes`
-**Payload:** Cliente sem `id` e endereços sem `id`
+**Endpoint:** `POST /api/clients`
+**Payload:** Client sem `id` e endereços sem `id`
 
 ```json
 {
@@ -71,10 +71,10 @@ Este documento define a estrutura de dados completa para operações de **create
 }
 ```
 
-### UPDATE - Cliente Existente
+### UPDATE - Client Existente
 
-**Endpoint:** `PUT /api/clientes/{id}`
-**Payload:** Cliente com `id` e endereços com ou sem `id`
+**Endpoint:** `PUT /api/clients/{id}`
+**Payload:** Client com `id` e endereços com ou sem `id`
 
 ```json
 {
@@ -165,7 +165,7 @@ CREATE TABLE addresses (
 
 ## ✅ Validações
 
-### Cliente
+### Client
 
 - `name`: obrigatório, 2-100 caracteres
 - `nickname`: opcional, máximo 50 caracteres
@@ -222,7 +222,7 @@ CREATE TABLE addresses (
       }
     ]
   },
-  "message": "Cliente criado com sucesso"
+  "message": "Client criado com sucesso"
 }
 ```
 
@@ -243,8 +243,8 @@ CREATE TABLE addresses (
 
 ## 🔗 Relacionamentos
 
-- **1 Cliente** pode ter **1 Documento** (one-to-one)
-- **1 Cliente** pode ter **N Endereços** (one-to-many)
+- **1 Client** pode ter **1 Documento** (one-to-one)
+- **1 Client** pode ter **N Endereços** (one-to-many)
 - Todos os registros são **soft delete** (não removidos fisicamente)
 
 ---
