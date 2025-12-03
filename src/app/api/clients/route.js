@@ -14,11 +14,19 @@ export async function GET(request) {
     }
 
     // Construir URL com parâmetros
-    let apiUrl = `${fastApiUrl}/clients?page=${page}&limit=${limit}`;
-    if (search) {
-      apiUrl += `&search=${encodeURIComponent(search)}`;
-    }
+    let apiUrl = fastApiUrl;
 
+    if (search) {
+      // Teste diferentes endpoints de busca:
+      // apiUrl += `/clients/search/text?q=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
+      // apiUrl += `/clients/search?q=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
+      apiUrl += `/clients/search/similar?q=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
+      console.log('🔍 Search URL:', apiUrl);
+    } else {
+      // Endpoint normal de listagem
+      apiUrl += `/clients?page=${page}&limit=${limit}`;
+      console.log('Clients URL:', apiUrl);
+    }
     const response = await fetch(apiUrl, {
       method: 'GET',
     });

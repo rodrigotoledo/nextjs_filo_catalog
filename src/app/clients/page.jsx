@@ -327,14 +327,12 @@ function ClientsContent() {
         />
 
         {/* Estados de loading e error */}
-        {isLoading && (
+        {isLoading ? (
           <div className="text-center py-8">
             <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-sm text-muted">Carregando clients...</p>
           </div>
-        )}
-
-        {error && (
+        ) : error ? (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
             <p className="text-sm text-red-600">Erro: {error.message}</p>
             <button
@@ -344,16 +342,13 @@ function ClientsContent() {
               Tentar novamente
             </button>
           </div>
-        )}
-
-        {!isLoading && !error && (
+        ) : isSearching ? (
+          <div className="text-center py-8">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-sm text-muted">Buscando clients...</p>
+          </div>
+        ) : (
           <div className="space-y-6 sm:space-y-8 md:space-y-12">
-            {isSearching && (
-              <div className="text-center py-8 sm:py-12">
-                <div className="w-8 h-8 sm:w-12 sm:h-12 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-sm text-muted">Buscando clients...</p>
-              </div>
-            )}
           {/* Formulário de cadastro */}
           <div className="bg-card/50 border border-border rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8">
             <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
