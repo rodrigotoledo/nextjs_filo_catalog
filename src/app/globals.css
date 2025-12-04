@@ -105,6 +105,15 @@ html, body {
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
+  height: 49px !important; /* Altura padrão para desktop */
+}
+
+/* Altura menor para dispositivos móveis */
+@media (max-width: 640px) {
+  .select-theme {
+    height: 37px !important; /* Altura menor em mobile */
+    padding: 6px 10px; /* Padding menor também */
+  }
 }
 
 /* Hover */

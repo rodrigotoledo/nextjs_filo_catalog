@@ -23,7 +23,6 @@ export async function GET(request) {
     }
 
     const data = await response.json();
-    console.log('Search results:', data);
     // Map results to add url
     const resultsWithUrl = data.results.map(result => ({
       ...result.photo,

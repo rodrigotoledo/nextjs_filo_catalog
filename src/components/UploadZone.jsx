@@ -38,7 +38,6 @@ export default function UploadZone() {
       }
 
       const result = await response.json();
-      console.log('Upload successful:', result);
       queryClient.invalidateQueries({ queryKey: ['photos'] });
     } catch (error) {
       console.error('Upload error:', error);

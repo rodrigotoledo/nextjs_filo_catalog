@@ -11,15 +11,17 @@ export async function POST(request) {
     }
 
     if (!clientId) {
-      return NextResponse.json({ error: 'Client ID is required' }, { status: 400 });
+      return NextResponse.json({ error: 'Client ID is required for frontend association' }, { status: 400 });
     }
 
     // Create a new FormData to send to FastAPI
     const fastApiFormData = new FormData();
     files.forEach((file, index) => {
-      fastApiFormData.append('files', file);
+      fastApiFormData.append('file', file);
     });
-    fastApiFormData.append('clientId', clientId);
+    fastApiFormData.append('create_client', 'true');
+    // Note: clientId is not sent to FastAPI as the endpoint doesn't expect it
+    // The clientId is used only for frontend association
 
     // Get the FastAPI URL from env
     const fastApiUrl = process.env.FASTAPI_URL;
@@ -28,7 +30,7 @@ export async function POST(request) {
     }
 
     // Send to FastAPI
-    const response = await fetch(`${fastApiUrl}/documents/upload`, {
+    const response = await fetch(`${fastApiUrl}/clients/upload-document`, {
       method: 'POST',
       body: fastApiFormData,
     });

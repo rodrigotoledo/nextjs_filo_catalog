@@ -20,7 +20,6 @@ export async function GET(request, { params }) {
     }
 
     const data = await response.json();
-    console.log('Fetched client data:', data);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Fetch client error:', error);
@@ -31,7 +30,7 @@ export async function GET(request, { params }) {
 // PUT /api/clients/[id] - Atualizar client
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await eparams;
     const body = await request.json();
 
     const fastApiUrl = process.env.FASTAPI_URL;
@@ -53,7 +52,6 @@ export async function PUT(request, { params }) {
     }
 
     const data = await response.json();
-    console.log('Updated client:', data);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Update client error:', error);
@@ -64,7 +62,9 @@ export async function PUT(request, { params }) {
 // DELETE /api/clients/[id] - Deletar client
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+
+    const { id } = await params;
+
 
     const fastApiUrl = process.env.FASTAPI_URL;
     if (!fastApiUrl) {

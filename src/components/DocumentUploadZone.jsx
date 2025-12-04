@@ -4,10 +4,11 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "@uploadthing/react";
 import { FileText, Upload, X } from "lucide-react";
 
-export default function DocumentUploadZone({ clientId, onDocumentUploaded }) {
+export default function DocumentUploadZone({ clientId, onDocumentUploaded, onOcrDataExtracted }) {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [processingOcr, setProcessingOcr] = useState(false);
 
   const handleUpload = useCallback(async (fileList) => {
     setUploading(true);
@@ -30,14 +31,26 @@ export default function DocumentUploadZone({ clientId, onDocumentUploaded }) {
       }
 
       const result = await response.json();
-      console.log('Document upload successful:', result);
 
       // Callback para atualizar a lista de documentos do client
       if (onDocumentUploaded) {
         onDocumentUploaded(result);
       }
 
-      alert(`${fileList.length} documento(s) enviado(s)! Processamento com IA iniciado.`);
+      // Se o resultado contém dados OCR extraídos, processar
+      if (result.extracted_data) {
+        setProcessingOcr(true);
+        // Simular processamento OCR (no backend real isso seria automático)
+        setTimeout(() => {
+          setProcessingOcr(false);
+          if (onOcrDataExtracted) {
+            onOcrDataExtracted(result.extracted_data);
+          }
+          alert(`${fileList.length} documento(s) enviado(s)! Dados extraídos com sucesso.`);
+        }, 2000); // Simular 2 segundos de processamento
+      } else {
+        alert(`${fileList.length} documento(s) enviado(s)! Processamento com IA iniciado.`);
+      }
     } catch (error) {
       console.error('Upload error:', error);
       alert('Erro no upload. Tente novamente.');
@@ -117,6 +130,12 @@ export default function DocumentUploadZone({ clientId, onDocumentUploaded }) {
                 <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
               </div>
               <p className="text-xs text-muted">Processando {files.length} documento(s)...</p>
+            </div>
+          ) : processingOcr ? (
+            <div className="space-y-2 sm:space-y-3">
+              <div className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <div className="text-lg sm:text-xl md:text-3xl font-semibold text-blue-600">OCR</div>
+              <p className="text-xs text-muted">Extraindo dados dos documentos...</p>
             </div>
           ) : (
             <div className="space-y-2 sm:space-y-3">

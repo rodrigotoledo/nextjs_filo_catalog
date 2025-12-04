@@ -4,9 +4,11 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { UserPlus, Users, Mail, Phone, MapPin, FileText, Plus, Trash2, Edit, Search } from "lucide-react";
 import DocumentUploadZone from "../../components/DocumentUploadZone";
 import SeedForm from "../../components/SeedForm";
+import ClientForm from "../../components/ClientForm";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,11 @@ function ClientsContent() {
   const [searchResults, setSearchResults] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchClient, setSearchClient] = useState("");
+  const [editingClient, setEditingClient] = useState(null); // Cliente sendo editado
+  const [isEditing, setIsEditing] = useState(false); // Se está no modo de edição
+  const [ocrExtractedData, setOcrExtractedData] = useState(null); // Dados extraídos do OCR
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['clients', currentPage],
@@ -137,6 +144,68 @@ function ClientsContent() {
 
   // Função para buscar clients da API
 
+  // Função para deletar client via API
+  const deleteClient = async (clientId) => {
+    try {
+      const response = await fetch(`/api/clients/${clientId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao deletar client');
+      }
+
+      // Invalidar queries para atualizar a lista
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  // Função para iniciar edição no formulário principal
+  const startEditing = (client) => {
+    setEditingClient(client);
+    setIsEditing(true);
+    setNewClient({
+      name: client.name || '',
+      nickname: client.nickname || '',
+      email: client.email || '',
+      phone: client.phone || '',
+      documents: client.documents ? {
+        cpf: client.documents.cpf || '',
+        rg: client.documents.rg || '',
+        birth_date: client.documents.birth_date || ''
+      } : {
+        cpf: '',
+        rg: '',
+        birth_date: ''
+      },
+      addresses: client.addresses || [
+        {
+          id: 1,
+          type: "Pessoal",
+          street: "",
+          number: "",
+          complement: "",
+          neighborhood: "",
+          city: "",
+          state: "",
+          zip_code: ""
+        }
+      ]
+    });
+    // Scroll para o topo do formulário
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Função para lidar com dados OCR extraídos
+  const handleOcrDataExtracted = (data) => {
+    console.log('Dados OCR extraídos:', data);
+    setOcrExtractedData(data);
+    alert('Dados extraídos do documento! Os campos foram preenchidos automaticamente.');
+  };
+
   // Função para atualizar client via API
   const updateClient = async (clientId, clientData) => {
     try {
@@ -153,29 +222,8 @@ function ClientsContent() {
         throw new Error(errorData.error || 'Erro ao atualizar client');
       }
 
-      const updatedClient = await response.json();
-      setClients(prev => prev.map(client =>
-        client.id === clientId ? updatedClient : client
-      ));
-      return updatedClient;
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  // Função para deletar client via API
-  const deleteClient = async (clientId) => {
-    try {
-      const response = await fetch(`/api/clients/${clientId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro ao deletar client');
-      }
-
-      setClients(prev => prev.filter(client => client.id !== clientId));
+      // Invalidar queries para atualizar a lista
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
     } catch (err) {
       throw err;
     }
@@ -229,11 +277,19 @@ function ClientsContent() {
         nickname: newClient.nickname || newClient.name.split(' ')[0]
       };
 
-      await createClient(clientData);
-      resetNewClient();
-      alert('Client criado com sucesso!');
+      if (isEditing && editingClient) {
+        // Modo edição
+        await updateClient(editingClient.id, clientData);
+        cancelEditing();
+        alert('Cliente atualizado com sucesso!');
+      } else {
+        // Modo criação
+        await createClient(clientData);
+        resetNewClient();
+        alert('Cliente criado com sucesso!');
+      }
     } catch (error) {
-      alert('Erro ao criar client: ' + error.message);
+      alert(`Erro ao ${isEditing ? 'atualizar' : 'criar'} cliente: ` + error.message);
     }
   };
 
@@ -261,51 +317,6 @@ function ClientsContent() {
           zip_code: ""
         }
       ]
-    });
-  };
-
-  const addAddress = () => {
-    const newAddress = {
-      id: newClient.addresses.length + 1,
-      type: "Comercial",
-      street: "",
-      number: "",
-      complement: "",
-      neighborhood: "",
-      city: "",
-      state: "",
-      zip_code: ""
-    };
-    setNewClient({
-      ...newClient,
-      addresses: [...newClient.addresses, newAddress]
-    });
-  };
-
-  const removeAddress = (addressId) => {
-    if (newClient.addresses.length > 1) {
-      setNewClient({
-        ...newClient,
-        addresses: newClient.addresses.filter(end => end.id !== addressId)
-      });
-    }
-  };
-
-  const updateAddress = (addressId, field, value) => {
-    setNewClient({
-      ...newClient,
-      addresses: newClient.addresses.map(end =>
-        end.id === addressId ? { ...end, [field]: value } : end
-      )
-    });
-  };
-
-  const handleNameChange = (name) => {
-    const nickname = newClient.nickname || name.split(' ')[0];
-    setNewClient({
-      ...newClient,
-      name,
-      nickname
     });
   };
 
@@ -350,304 +361,15 @@ function ClientsContent() {
         ) : (
           <div className="space-y-6 sm:space-y-8 md:space-y-12">
           {/* Formulário de cadastro */}
-          <div className="bg-card/50 border border-border rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8">
-            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-              <UserPlus className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-              <h2 className="text-lg sm:text-2xl font-semibold">Novo Client</h2>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              {/* Dados Básicos */}
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="text-sm sm:text-base font-semibold flex items-center gap-2">
-                  <UserPlus className="w-4 h-4" />
-                  Dados Básicos
-                </h3>
-
-                <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium mb-1">
-                      Nome <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={newClient.name}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                      placeholder="Nome completo"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium mb-1">
-                      Apelido
-                    </label>
-                    <input
-                      type="text"
-                      value={newClient.nickname}
-                      onChange={(e) => setNewClient({...newClient, nickname: e.target.value})}
-                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                      placeholder="Como será chamado"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium mb-1">
-                      E-mail <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      value={newClient.email}
-                      onChange={(e) => setNewClient({...newClient, email: e.target.value})}
-                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                      placeholder="client@email.com"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium mb-1">
-                      Telefone
-                    </label>
-                    <input
-                      type="tel"
-                      value={newClient.phone}
-                      onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
-                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                      placeholder="(11) 99999-9999"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Documentos */}
-              <div className="space-y-3 sm:space-y-4">
-                <h3 className="text-sm sm:text-base font-semibold flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  Documentos
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium mb-1">
-                      CPF <span className="text-red-500">*</span>
-                    </label>
-                    <MaskedInput
-                      mask="99999999999"
-                      value={newClient.documents.cpf}
-                      onChange={(e) => setNewClient({
-                        ...newClient,
-                        documents: {...newClient.documents, cpf: e.target.value}
-                      })}
-                      type="text"
-                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                      placeholder="00000000000"
-                      required
-                      maxLength="11"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium mb-1">RG</label>
-                    <input
-                      type="text"
-                      value={newClient.documents.rg}
-                      onChange={(e) => setNewClient({
-                        ...newClient,
-                        documents: {...newClient.documents, rg: e.target.value}
-                      })}
-                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                      placeholder="00.000.000-0"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-medium mb-1">Data Nascimento</label>
-                    <input
-                      type="date"
-                      value={newClient.documents.birth_date}
-                      onChange={(e) => setNewClient({
-                        ...newClient,
-                        documents: {...newClient.documents, birth_date: e.target.value}
-                      })}
-                      className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Endereços */}
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm sm:text-base font-semibold flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    Endereços
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={addAddress}
-                    className="flex items-center gap-1 px-3 py-1 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-xs sm:text-sm"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Adicionar
-                  </button>
-                </div>
-
-                {newClient.addresses.map((address, index) => (
-                  <div key={address.id} className="bg-background/50 border border-border rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium">Endereço {index + 1}</h4>
-                      {newClient.addresses.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeAddress(address.id)}
-                          className="p-1 text-red-500 hover:bg-red-500/10 rounded"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
-                      <div className="col-span-2">
-                        <label className="block text-xs sm:text-sm font-medium mb-1">Tipo</label>
-                        <select
-                          value={address.type}
-                          onChange={(e) => updateAddress(address.id, 'type', e.target.value)}
-                          className="select-theme w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg text-sm sm:text-base cursor-pointer"
-                        >
-                          <option value="Pessoal">Pessoal</option>
-                          <option value="Comercial">Comercial</option>
-                          <option value="Entrega">Entrega</option>
-                          <option value="Cobrança">Cobrança</option>
-                        </select>
-
-                      </div>
-
-                      <div className="col-span-2">
-                        <label className="block text-xs sm:text-sm font-medium mb-1">Logradouro</label>
-                        <input
-                          type="text"
-                          value={address.street}
-                          onChange={(e) => updateAddress(address.id, 'street', e.target.value)}
-                          className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                          placeholder="Rua, Avenida, etc."
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs sm:text-sm font-medium mb-1">Número</label>
-                        <input
-                          type="text"
-                          value={address.number}
-                          onChange={(e) => updateAddress(address.id, 'number', e.target.value)}
-                          className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                          placeholder="123"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs sm:text-sm font-medium mb-1">Complemento</label>
-                        <input
-                          type="text"
-                          value={address.complement}
-                          onChange={(e) => updateAddress(address.id, 'complement', e.target.value)}
-                          className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                          placeholder="Apto, Sala, etc."
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs sm:text-sm font-medium mb-1">Bairro</label>
-                        <input
-                          type="text"
-                          value={address.neighborhood}
-                          onChange={(e) => updateAddress(address.id, 'neighborhood', e.target.value)}
-                          className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                          placeholder="Centro"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs sm:text-sm font-medium mb-1">Cidade</label>
-                        <input
-                          type="text"
-                          value={address.city}
-                          onChange={(e) => updateAddress(address.id, 'city', e.target.value)}
-                          className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                          placeholder="São Paulo"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs sm:text-sm font-medium mb-1">Estado</label>
-                        <select
-                          value={address.state}
-                          onChange={(e) => updateAddress(address.id, 'state', e.target.value)}
-                          className="select-theme w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg text-sm sm:text-base cursor-pointer"
-                        >
-                          <option value="" className="bg-background text-foreground">Selecione</option>
-                          <option value="AC" className="bg-background text-foreground">Acre</option>
-                          <option value="AL" className="bg-background text-foreground">Alagoas</option>
-                          <option value="AP" className="bg-background text-foreground">Amapá</option>
-                          <option value="AM" className="bg-background text-foreground">Amazonas</option>
-                          <option value="BA" className="bg-background text-foreground">Bahia</option>
-                          <option value="CE" className="bg-background text-foreground">Ceará</option>
-                          <option value="DF" className="bg-background text-foreground">Distrito Federal</option>
-                          <option value="ES" className="bg-background text-foreground">Espírito Santo</option>
-                          <option value="GO" className="bg-background text-foreground">Goiás</option>
-                          <option value="MA" className="bg-background text-foreground">Maranhão</option>
-                          <option value="MT" className="bg-background text-foreground">Mato Grosso</option>
-                          <option value="MS" className="bg-background text-foreground">Mato Grosso do Sul</option>
-                          <option value="MG" className="bg-background text-foreground">Minas Gerais</option>
-                          <option value="PA" className="bg-background text-foreground">Pará</option>
-                          <option value="PB" className="bg-background text-foreground">Paraíba</option>
-                          <option value="PR" className="bg-background text-foreground">Paraná</option>
-                          <option value="PE" className="bg-background text-foreground">Pernambuco</option>
-                          <option value="PI" className="bg-background text-foreground">Piauí</option>
-                          <option value="RJ" className="bg-background text-foreground">Rio de Janeiro</option>
-                          <option value="RN" className="bg-background text-foreground">Rio Grande do Norte</option>
-                          <option value="RS" className="bg-background text-foreground">Rio Grande do Sul</option>
-                          <option value="RO" className="bg-background text-foreground">Rondônia</option>
-                          <option value="RR" className="bg-background text-foreground">Roraima</option>
-                          <option value="SC" className="bg-background text-foreground">Santa Catarina</option>
-                          <option value="SP" className="bg-background text-foreground">São Paulo</option>
-                          <option value="SE" className="bg-background text-foreground">Sergipe</option>
-                          <option value="TO" className="bg-background text-foreground">Tocantins</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs sm:text-sm font-medium mb-1">
-                          CEP <span className="text-red-500">*</span>
-                        </label>
-                        <MaskedInput
-                          mask="99999-999"
-                          value={address.zip_code}
-                          onChange={(e) => updateAddress(address.id, 'zip_code', e.target.value)}
-                          type="text"
-                          className="w-full px-3 py-2 sm:px-4 sm:py-3 bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none text-sm sm:text-base"
-                          placeholder="00000-000"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full px-4 py-2 sm:px-6 sm:py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-1 sm:gap-2 text-sm sm:text-base"
-              >
-                <UserPlus className="w-4 h-4 sm:w-5 sm:h-5" />
-                Cadastrar Client
-              </button>
-            </form>
-          </div>
+          <ClientForm
+            clientData={newClient}
+            setClientData={setNewClient}
+            onSubmit={handleSubmit}
+            onCancel={isEditing ? cancelEditing : null}
+            isEditing={isEditing}
+            title={isEditing ? 'Editar Cliente' : 'Novo Cliente'}
+            ocrData={ocrExtractedData}
+          />
 
           {/* Upload de Documentos */}
           <div className="bg-card/50 border border-border rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8">
@@ -659,9 +381,9 @@ function ClientsContent() {
             <DocumentUploadZone
               clientId={null} // Para novos clients, será null até cadastrar
               onDocumentUploaded={(result) => {
-                console.log('Documentos enviados:', result);
                 // Aqui podemos adicionar lógica para associar documentos ao client
               }}
+              onOcrDataExtracted={handleOcrDataExtracted}
             />
           </div>
 
@@ -715,15 +437,30 @@ function ClientsContent() {
                 <div key={client.id} className="bg-background border border-border rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4">
                   {/* Header do client */}
                   <div className="flex items-start justify-between">
-                    <div>
+                    <div className="flex-1">
                       <h3 className="font-semibold text-sm sm:text-lg">{client.name}</h3>
                       {client.nickname && client.nickname !== client.name.split(' ')[0] && (
                         <p className="text-xs sm:text-sm text-muted">Apelido: {client.nickname}</p>
                       )}
                     </div>
-                    <button className="p-1 hover:bg-muted rounded">
-                      <Edit className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => startEditing(client)}
+                        className="p-1 hover:bg-muted rounded"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Tem certeza que deseja excluir o cliente "${client.name}"?`)) {
+                            deleteClient(client.id);
+                          }
+                        }}
+                        className="p-1 hover:bg-red-500/10 rounded text-red-500 hover:text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Contato */}
@@ -741,34 +478,34 @@ function ClientsContent() {
                   </div>
 
                   {/* Documentos */}
-                  {(client.documents.cpf || client.documents.rg || client.documents.birth_date) && (
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-medium text-muted flex items-center gap-1">
-                        <FileText className="w-3 h-3" />
-                        Documentos
-                      </h4>
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-medium text-muted flex items-center gap-1">
+                      <FileText className="w-3 h-3" />
+                      Documentos
+                    </h4>
+                    {(client.documents?.cpf || client.documents?.rg || client.documents?.birth_date) && (
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                        {client.documents.cpf && (
+                        {client.documents?.cpf && (
                           <div>
                             <span className="text-muted">CPF:</span>
                             <span className="ml-1 truncate">{client.documents.cpf}</span>
                           </div>
                         )}
-                        {client.documents.rg && (
+                        {client.documents?.rg && (
                           <div>
                             <span className="text-muted">RG:</span>
                             <span className="ml-1 truncate">{client.documents.rg}</span>
                           </div>
                         )}
-                        {client.documents.birth_date && (
+                        {client.documents?.birth_date && (
                           <div>
                             <span className="text-muted">Nasc:</span>
                             <span className="ml-1 truncate">{new Date(client.documents.birth_date).toLocaleDateString('pt-BR')}</span>
                           </div>
                         )}
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   {/* Endereço principal */}
                   {client.addresses && client.addresses.length > 0 && (
@@ -793,6 +530,8 @@ function ClientsContent() {
                       </div>
                     </div>
                   )}
+
+
                 </div>
               ))
             )}

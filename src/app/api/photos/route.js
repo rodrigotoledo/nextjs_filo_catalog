@@ -20,7 +20,6 @@ export async function GET(request) {
     }
 
     const data = await response.json();
-    console.log('Fetched photos data:', data);
     // Map photos to add url
     const photosWithUrl = data.photos.map(photo => ({
       ...photo,

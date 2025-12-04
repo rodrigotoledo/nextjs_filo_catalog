@@ -20,12 +20,10 @@ export async function GET(request) {
       // Teste diferentes endpoints de busca:
       // apiUrl += `/clients/search/text?q=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
       // apiUrl += `/clients/search?q=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
-      apiUrl += `/clients/search/similar?q=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
-      console.log('🔍 Search URL:', apiUrl);
+      apiUrl += `/clients/?search=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
     } else {
       // Endpoint normal de listagem
-      apiUrl += `/clients?page=${page}&limit=${limit}`;
-      console.log('Clients URL:', apiUrl);
+      apiUrl += `/clients/?page=${page}&limit=${limit}`;
     }
     const response = await fetch(apiUrl, {
       method: 'GET',
@@ -37,7 +35,6 @@ export async function GET(request) {
     }
 
     const data = await response.json();
-    console.log('Fetched clients data:', data);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Fetch clients error:', error);
@@ -69,7 +66,6 @@ export async function POST(request) {
     }
 
     const data = await response.json();
-    console.log('Created client:', data);
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     console.error('Create client error:', error);

@@ -10,7 +10,6 @@ export default function SearchBar({ onSearch }) {
     e.preventDefault();
     if (!query.trim()) return;
 
-    console.log("Buscando por:", query);
     await onSearch(query);
   };
 

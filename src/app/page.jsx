@@ -24,7 +24,6 @@ function HomeContent() {
       const response = await fetch(`/api/photos?page=${currentPage}`);
       if (!response.ok) throw new Error('Failed to fetch photos');
       const data = await response.json();
-      console.log('Photos data:', data);
       return data;
     },
     enabled: !searchResults, // Disable when searching
