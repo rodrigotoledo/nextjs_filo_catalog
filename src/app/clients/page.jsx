@@ -199,6 +199,14 @@ function ClientsContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Função para cancelar edição
+  const cancelEditing = () => {
+    setEditingClient(null);
+    setIsEditing(false);
+    setOcrExtractedData(null);
+    resetNewClient();
+  };
+
   // Função para lidar com dados OCR extraídos
   const handleOcrDataExtracted = (data) => {
     console.log('Dados OCR extraídos:', data);

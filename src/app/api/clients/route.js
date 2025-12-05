@@ -25,6 +25,7 @@ export async function GET(request) {
       // Endpoint normal de listagem
       apiUrl += `/clients/?page=${page}&limit=${limit}`;
     }
+    console.log(apiUrl)
     const response = await fetch(apiUrl, {
       method: 'GET',
     });

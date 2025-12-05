@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
 // PUT /api/clients/[id] - Atualizar client
 export async function PUT(request, { params }) {
   try {
-    const { id } = await eparams;
+    const { id } = await params;
     const body = await request.json();
 
     const fastApiUrl = process.env.FASTAPI_URL;
