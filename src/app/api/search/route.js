@@ -13,7 +13,7 @@ export async function GET(request) {
       return NextResponse.json({ error: 'FastAPI URL not configured' }, { status: 500 });
     }
 
-    const response = await fetch(`${fastApiUrl}/photos/search/text/?processed_only=true&q=${encodeURIComponent(q)}`, {
+    const response = await fetch(`${fastApiUrl}/photos/search/smart/?processed_only=true&q=${encodeURIComponent(q)}`, {
       method: 'GET',
     });
 
