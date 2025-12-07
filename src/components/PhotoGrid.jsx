@@ -1,3 +1,5 @@
+import { Tooltip } from 'react-tooltip';
+
 export default function PhotoGrid({ photos = [] }) {
   if (photos.length === 0) {
     return (
@@ -21,10 +23,11 @@ export default function PhotoGrid({ photos = [] }) {
         <div
           key={photo.id}
           className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-card/50 shadow-lg transition-all hover:shadow-2xl hover:border-primary/30"
+          data-tip={photo.justification || 'Sem justificativa'}
         >
           <img
             src={photo.url}
-            alt="Foto do catálogo"
+            alt={photo.justification || 'Foto do catálogo'}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
           />
@@ -44,6 +47,7 @@ export default function PhotoGrid({ photos = [] }) {
           </div>
         </div>
       ))}
+      <Tooltip />
     </div>
   );
 }
