@@ -81,7 +81,10 @@ export default function DocumentUploadZone({ clientId, onDocumentUploaded, onOcr
       "application/pdf": [".pdf"],
       "image/*": [".jpg", ".jpeg", ".png"],
       "application/msword": [".doc"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"]
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "text/markdown": [".md"],
+      "text/plain": [".txt"],
+      "text/csv": [".csv"]
     },
     multiple: true,
   });
@@ -144,7 +147,7 @@ export default function DocumentUploadZone({ clientId, onDocumentUploaded, onOcr
                 {isDragActive ? "Solte aqui" : "Arraste ou clique"}
               </p>
               <p className="text-xs text-muted">
-                PDF, JPG, PNG, DOC, DOCX
+                PDF, JPG, PNG, DOC, DOCX, MD, TXT, CSV (vários arquivos permitidos)
               </p>
             </div>
           )}

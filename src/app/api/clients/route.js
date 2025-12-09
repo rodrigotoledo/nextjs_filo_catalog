@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search');
     const page = parseInt(searchParams.get('page')) || 1;
     const limit = parseInt(searchParams.get('limit')) || 10;
 
@@ -16,15 +15,7 @@ export async function GET(request) {
     // Construir URL com parâmetros
     let apiUrl = fastApiUrl;
 
-    if (search) {
-      // Teste diferentes endpoints de busca:
-      // apiUrl += `/clients/search/text?q=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
-      // apiUrl += `/clients/search?q=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
-      apiUrl += `/clients/?search=${encodeURIComponent(search)}&page=${page}&limit=${limit}`;
-    } else {
-      // Endpoint normal de listagem
-      apiUrl += `/clients/?page=${page}&limit=${limit}`;
-    }
+    apiUrl += `/clients/?page=${page}&limit=${limit}`;
     console.log(apiUrl)
     const response = await fetch(apiUrl, {
       method: 'GET',

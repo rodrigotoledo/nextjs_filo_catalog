@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 
-export default function SearchBar({ onSearch }) {
+export default function SearchBar({ onSearch, placeholder }) {
   const [query, setQuery] = useState("");
 
   const handleSearch = async (e) => {
@@ -20,7 +20,7 @@ export default function SearchBar({ onSearch }) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="biquíni cinza, loira de lado..."
+          placeholder={placeholder || "nome, e-mail ou CPF, foto, descrição..."}
           className="w-full px-4 py-3 text-base sm:text-lg md:text-xl bg-card border border-border rounded-xl sm:rounded-2xl
                      focus:border-primary/60 focus:outline-none
                      placeholder-muted transition-all duration-200

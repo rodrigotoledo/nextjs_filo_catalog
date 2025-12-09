@@ -4,17 +4,17 @@ import { useState } from "react";
 import { Sparkles } from "lucide-react";
 
 export default function SeedForm({ onPopulate, title = "Popular Banco de Dados", description = "Adicione dados de exemplo ao catálogo baseado em um termo.", placeholder = "Ex: cachorros na praia...", buttonOnly = false }) {
-  const [term, setTerm] = useState("");
+  const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!buttonOnly && !term.trim()) return;
+    if (!buttonOnly && !q.trim()) return;
 
     setLoading(true);
     try {
-      await onPopulate(buttonOnly ? undefined : term);
-      if (!buttonOnly) setTerm("");
+      await onPopulate(buttonOnly ? undefined : q);
+      if (!buttonOnly) setQ("");
     } catch (error) {
       // Error handled in parent
     } finally {
@@ -35,8 +35,8 @@ export default function SeedForm({ onPopulate, title = "Popular Banco de Dados",
         {!buttonOnly && (
           <input
             type="text"
-            value={term}
-            onChange={(e) => setTerm(e.target.value)}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
             placeholder={placeholder}
             className="flex-1 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-background border border-border rounded-lg focus:border-primary/60 focus:outline-none"
             disabled={loading}
@@ -64,7 +64,7 @@ export default function SeedForm({ onPopulate, title = "Popular Banco de Dados",
         ) : (
           <button
             type="submit"
-            disabled={loading || !term.trim()}
+            disabled={loading || !q.trim()}
             className="px-4 py-2 sm:px-6 sm:py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
           >
             {loading ? (

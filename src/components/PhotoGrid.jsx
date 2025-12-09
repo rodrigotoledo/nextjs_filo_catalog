@@ -23,11 +23,11 @@ export default function PhotoGrid({ photos = [] }) {
         <div
           key={photo.id}
           className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-card/50 shadow-lg transition-all hover:shadow-2xl hover:border-primary/30"
-          data-tip={photo.justification || 'Sem justificativa'}
+          data-tip={photo.user_description || 'Sem justificativa'}
         >
           <img
             src={photo.url}
-            alt={photo.justification || 'Foto do catálogo'}
+            alt={photo.user_description || 'Foto do catálogo'}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
           />

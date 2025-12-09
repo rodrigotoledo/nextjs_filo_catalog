@@ -1,19 +1,25 @@
 import { NextResponse } from 'next/server';
 
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q');
-    if (!q) {
-      return NextResponse.json({ error: 'Query parameter q is required' }, { status: 400 });
-    }
+    const page = searchParams.get('page') || '1';
 
     const fastApiUrl = process.env.FASTAPI_URL;
     if (!fastApiUrl) {
       return NextResponse.json({ error: 'FastAPI URL not configured' }, { status: 500 });
     }
 
-    const response = await fetch(`${fastApiUrl}/photos/search/text/?processed_only=true&q=${encodeURIComponent(q)}`, {
+    // Construir URL com parâmetros
+    let apiUrl = fastApiUrl;
+
+    apiUrl += `/clients/search?q=${encodeURIComponent(q)}&page=${page}&limit=10`;
+
+    console.log(apiUrl)
+    console.log('Fetching clients from:', apiUrl);
+    const response = await fetch(apiUrl, {
       method: 'GET',
     });
 
@@ -23,18 +29,9 @@ export async function GET(request) {
     }
 
     const data = await response.json();
-    // Map results to add url
-    const resultsWithUrl = data.results.map(result => ({
-      ...result.photo,
-      url: `${fastApiUrl}/photos/file/${result.photo.id}`,
-      similarity_score: result.similarity_score
-    }));
-    return NextResponse.json({
-      results: resultsWithUrl,
-      message: data.message
-    });
+    return NextResponse.json(data);
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('Fetch clients error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
